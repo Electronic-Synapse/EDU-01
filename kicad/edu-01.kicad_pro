@@ -648,7 +648,7 @@
         "uuid": "0ec77515-b20c-4696-8261-92d4835dc067"
       }
     ],
-    "used_designators": "RES1,MASTER_LEVEL1,RV7A1,R1-26,R29-33,RV1-4,RV7,RV9,CUTOFF1,RV7B1,J1-5,#PWR1-24,#PWR29,D2-3,D5-6,FB1-2,C1-5,C9-19,C22,C25,C32-36,U1-3,U6,U8-9",
+    "used_designators": "RES1,CUTOFF1,RV7B1,J1-5,MASTER_LEVEL1,RV7A1,R1-26,R29-33,RV1-4,RV7,RV9,#PWR1-24,#PWR29,D2-3,D5-6,FB1-2,C1-5,C9-19,C22,C25,C32-36,U1-3,U6,U8-9",
     "variants": []
   },
   "sheets": [

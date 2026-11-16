@@ -3480,12 +3480,6 @@
 		(uuid "7086e6d5-8da1-4f33-a5b5-c17efe88515e")
 	)
 	(junction
-		(at 181.61 95.25)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "71b3bd27-3ebc-48f8-9f52-1481183a3581")
-	)
-	(junction
 		(at 355.6 267.97)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3556,6 +3550,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "a197a381-cb01-4a7e-b73b-d2e65a423849")
+	)
+	(junction
+		(at 181.61 95.25)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ad2a7fbc-0a6c-4319-9c60-86022f0f3a66")
 	)
 	(junction
 		(at 179.07 318.77)
@@ -4579,7 +4579,7 @@
 	)
 	(wire
 		(pts
-			(xy 166.37 95.25) (xy 172.72 95.25)
+			(xy 166.37 95.25) (xy 170.18 95.25)
 		)
 		(stroke
 			(width 0)
@@ -6109,7 +6109,7 @@
 	)
 	(wire
 		(pts
-			(xy 180.34 95.25) (xy 181.61 95.25)
+			(xy 177.8 95.25) (xy 181.61 95.25)
 		)
 		(stroke
 			(width 0)
@@ -10136,6 +10136,86 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:FerriteBead")
+		(at 173.99 95.25 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5379a02a-ca33-47a4-997a-c0f703e80af8")
+		(property "Reference" "FB1"
+			(at 173.9392 87.63 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "FerriteBead"
+			(at 173.9392 90.17 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Inductor_THT:L_Radial_D6.0mm_P4.00mm"
+			(at 173.99 97.028 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 173.99 95.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Ferrite bead"
+			(at 173.99 95.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "a037d58c-4247-4ac9-8c0a-bf5774fb4dd2")
+		)
+		(pin "1"
+			(uuid "f8852ba5-5382-4f4d-8db0-f2b65d61cf09")
+		)
+		(instances
+			(project "edu-01"
+				(path "/0ec77515-b20c-4696-8261-92d4835dc067"
+					(reference "FB1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 467.36 284.48 0)
 		(unit 1)
@@ -14008,22 +14088,22 @@
 			)
 		)
 		(pin "1"
-			(uuid "f943fa97-184f-4781-a473-4e09cf2a7ca5")
+			(uuid "f943fa97-184f-4781-a473-4e09cf2a7ca6")
 		)
 		(pin "2"
-			(uuid "3012521e-cc93-4e0b-b583-95efc70190c7")
+			(uuid "3012521e-cc93-4e0b-b583-95efc70190c8")
 		)
 		(pin "3"
-			(uuid "79b7a329-696f-482a-bd7e-3a59c123aaaa")
+			(uuid "79b7a329-696f-482a-bd7e-3a59c123aaab")
 		)
 		(pin "4"
-			(uuid "50592e13-8b87-4c97-b9d9-d293f6684e69")
+			(uuid "50592e13-8b87-4c97-b9d9-d293f6684e6a")
 		)
 		(pin "5"
-			(uuid "01c6d43e-bb0d-482f-86b4-b5712bb14b34")
+			(uuid "01c6d43e-bb0d-482f-86b4-b5712bb14b35")
 		)
 		(pin "6"
-			(uuid "3b4a9b8d-d775-472d-9e32-59654c2be8d2")
+			(uuid "3b4a9b8d-d775-472d-9e32-59654c2be8d3")
 		)
 		(instances
 			(project "edu-01"
@@ -16031,86 +16111,6 @@
 			(project "edu-01"
 				(path "/0ec77515-b20c-4696-8261-92d4835dc067"
 					(reference "D3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:FerriteBead")
-		(at 176.53 95.25 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "f4f92958-a053-440c-966a-29ba499de9f1")
-		(property "Reference" "L1"
-			(at 175.895 99.06 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "600R@100MHz"
-			(at 176.53 91.44 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
-			(at 176.53 95.25 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 176.53 95.25 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Ferrite bead"
-			(at 176.53 95.25 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "10e49234-b1e6-4611-83bc-30e89d44b72d")
-		)
-		(pin "2"
-			(uuid "99753880-52fd-40a8-8b2c-78ee10316fe4")
-		)
-		(instances
-			(project "edu-01"
-				(path "/0ec77515-b20c-4696-8261-92d4835dc067"
-					(reference "L1")
 					(unit 1)
 				)
 			)

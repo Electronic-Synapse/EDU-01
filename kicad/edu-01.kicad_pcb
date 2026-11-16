@@ -488,7 +488,7 @@
 	(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
 		(layer "F.Cu")
 		(uuid "08291fb9-d81c-48fb-9556-654112e40ee8")
-		(at 55.25 58.33)
+		(at 56.43 58.51)
 		(descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=10.16mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
 		(tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 10.16mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
 		(property "Reference" "R5"
@@ -8291,197 +8291,6 @@
 			)
 		)
 	)
-	(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
-		(layer "F.Cu")
-		(uuid "5c689ceb-c4e4-412f-b262-083256d75a2f")
-		(at 62.32 46.65 180)
-		(descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=10.16mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
-		(tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 10.16mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
-		(property "Reference" "L1"
-			(at 5.08 -2.37 0)
-			(layer "F.SilkS")
-			(uuid "bde58b0e-97c8-49df-8a6d-0a0d939bc214")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Value" "600R@100MHz"
-			(at 5.08 2.37 0)
-			(layer "F.Fab")
-			(uuid "8dfd2747-879d-454a-9491-e88afcf4e5f8")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "af8f4533-589a-478a-8b5a-d54755aa07ce")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Ferrite bead"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "ccf85db9-4590-417c-839d-5f76de4e10e7")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "KiLib_Generator" "resistor/THT"
-			(at 0 0 0)
-			(layer "F.SilkS")
-			(hide yes)
-			(uuid "ad333045-8e89-4b04-8998-70ee3e0b5799")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property ki_fp_filters "Inductor_* L_* *Ferrite*")
-		(path "/f4f92958-a053-440c-966a-29ba499de9f1")
-		(sheetname "/")
-		(sheetfile "edu-01.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
-		(attr through_hole)
-		(duplicate_pad_numbers_are_jumpers no)
-		(fp_line
-			(start 9.12 0)
-			(end 8.35 0)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "2abf70b2-1582-4977-9823-f0ddd62670e1")
-		)
-		(fp_line
-			(start 1.04 0)
-			(end 1.81 0)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "94dc1d70-949b-4697-974b-d6992ab6768a")
-		)
-		(fp_rect
-			(start 1.81 -1.37)
-			(end 8.35 1.37)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.SilkS")
-			(uuid "477e03eb-0963-48cd-9509-e7643f5bef12")
-		)
-		(fp_rect
-			(start -1.05 -1.5)
-			(end 11.21 1.5)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.CrtYd")
-			(uuid "20e176b0-81de-45e5-a751-d1643c3a396d")
-		)
-		(fp_line
-			(start 10.16 0)
-			(end 8.23 0)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(layer "F.Fab")
-			(uuid "56238cae-d17c-4565-89ac-b3eff230a6f6")
-		)
-		(fp_line
-			(start 0 0)
-			(end 1.93 0)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(layer "F.Fab")
-			(uuid "e3906b07-fc92-4c26-873c-7f9ddd76ac0c")
-		)
-		(fp_rect
-			(start 1.93 -1.25)
-			(end 8.23 1.25)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.Fab")
-			(uuid "e4f177ca-4783-4e11-a13c-639fe1423089")
-		)
-		(fp_text user "${REFERENCE}"
-			(at 5.08 0 0)
-			(layer "F.Fab")
-			(uuid "16228a06-8918-4091-981c-b09a49dbe949")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(pad "1" thru_hole circle
-			(at 0 0 180)
-			(size 1.6 1.6)
-			(drill 0.8)
-			(layers "*.Cu" "*.Mask")
-			(remove_unused_layers no)
-			(net "Net-(F1-Pad2)")
-			(pintype "passive")
-			(uuid "d31304a8-880d-41d3-9520-05cca3731b71")
-		)
-		(pad "2" thru_hole circle
-			(at 10.16 0 180)
-			(size 1.6 1.6)
-			(drill 0.8)
-			(layers "*.Cu" "*.Mask")
-			(remove_unused_layers no)
-			(net "+5V")
-			(pintype "passive")
-			(uuid "1fadea22-cc0f-4e29-8639-613cbd560219")
-		)
-		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Resistor_THT.3dshapes/R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal.step"
-			(offset
-				(xyz 0 0 0)
-			)
-			(scale
-				(xyz 1 1 1)
-			)
-			(rotate
-				(xyz 0 0 0)
-			)
-		)
-	)
 	(footprint "TestPoint:TestPoint_Loop_D2.60mm_Drill0.9mm_Beaded"
 		(layer "F.Cu")
 		(uuid "5ede30ea-4abc-460f-901c-3c866464d831")
@@ -11698,7 +11507,7 @@
 	(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 		(layer "F.Cu")
 		(uuid "87b9bc9d-29f0-4612-a220-300cb185c2a4")
-		(at 46.7 57.53 180)
+		(at 45.39 62.15 180)
 		(descr "C, Disc series, Radial, pin pitch=5.00mm, diameter*width=5*2.5mm^2, Capacitor, http://cdn-reichelt.de/documents/datenblatt/B300/DS_KERKO_TC.pdf")
 		(tags "C Disc series Radial pin pitch 5.00mm diameter 5mm width 2.5mm Capacitor")
 		(property "Reference" "C2"
@@ -14972,7 +14781,7 @@
 	(footprint "Capacitor_THT:CP_Radial_D8.0mm_P3.50mm"
 		(layer "F.Cu")
 		(uuid "aa04a2b3-cb19-432d-aaa7-dc1420d42da4")
-		(at 45.792651 48.67 180)
+		(at 44.972651 53.53 180)
 		(descr "CP, Radial series, Radial, pin pitch=3.50mm, diameter=8mm, height=12mm, Electrolytic Capacitor")
 		(tags "CP Radial series Radial pin pitch 3.50mm diameter 8mm height 12mm Electrolytic Capacitor")
 		(property "Reference" "C1"
@@ -17843,7 +17652,7 @@
 	(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 		(layer "F.Cu")
 		(uuid "b603e180-8ad4-4b8a-9eec-99fd941db417")
-		(at 68.68 58.71)
+		(at 69.98 58.79)
 		(descr "C, Disc series, Radial, pin pitch=5.00mm, diameter*width=5*2.5mm^2, Capacitor, http://cdn-reichelt.de/documents/datenblatt/B300/DS_KERKO_TC.pdf")
 		(tags "C Disc series Radial pin pitch 5.00mm diameter 5mm width 2.5mm Capacitor")
 		(property "Reference" "C15"
@@ -23239,11 +23048,11 @@
 	(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 		(layer "F.Cu")
 		(uuid "e1f9b212-eb2d-4bd4-9ecd-4cd169a4c371")
-		(at 65.81 41.2 -90)
+		(at 62.23 46.56 180)
 		(descr "C, Disc series, Radial, pin pitch=5.00mm, diameter*width=5*2.5mm^2, Capacitor, http://cdn-reichelt.de/documents/datenblatt/B300/DS_KERKO_TC.pdf")
 		(tags "C Disc series Radial pin pitch 5.00mm diameter 5mm width 2.5mm Capacitor")
 		(property "Reference" "F1"
-			(at 2.5 -2.5 90)
+			(at 2.5 -2.5 0)
 			(layer "F.SilkS")
 			(uuid "41ac34a4-d348-41b0-9e93-bca31d3937e0")
 			(effects
@@ -23254,7 +23063,7 @@
 			)
 		)
 		(property "Value" "500mA"
-			(at 2.5 2.5 90)
+			(at 2.5 2.5 0)
 			(layer "F.Fab")
 			(uuid "495c834d-13c0-4678-8f8a-0493e88c42c4")
 			(effects
@@ -23265,7 +23074,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 0 0 90)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "4c3e3eac-6039-4dbf-aabd-31889506edc5")
@@ -23276,7 +23085,7 @@
 			)
 		)
 		(property "Description" "Resettable fuse, polymeric positive temperature coefficient"
-			(at 0 0 90)
+			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "64c8c630-d7b1-4d07-9eea-d0c248e69c4e")
@@ -23287,7 +23096,7 @@
 			)
 		)
 		(property "KiLib_Generator" "capacitor/THT/other"
-			(at 0 0 90)
+			(at 0 0 0)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "c5e6de4e-4be2-4cee-a086-e3629e10a152")
@@ -23311,16 +23120,6 @@
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
-			(start -0.12 1.37)
-			(end -0.12 1.033)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "40a3276a-67d5-4631-8ec4-3145ccbeff95")
-		)
-		(fp_line
 			(start 5.12 1.37)
 			(end -0.12 1.37)
 			(stroke
@@ -23341,6 +23140,26 @@
 			(uuid "153df990-ddab-42ba-8026-1158404e55ce")
 		)
 		(fp_line
+			(start 5.12 -1.37)
+			(end 5.12 -1.033)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "8bf9c7a7-3ca7-4734-88fb-12a81f299080")
+		)
+		(fp_line
+			(start -0.12 1.37)
+			(end -0.12 1.033)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "40a3276a-67d5-4631-8ec4-3145ccbeff95")
+		)
+		(fp_line
 			(start -0.12 -1.033)
 			(end -0.12 -1.37)
 			(stroke
@@ -23359,16 +23178,6 @@
 			)
 			(layer "F.SilkS")
 			(uuid "35683bb2-226b-47ef-8659-3e360eeb4488")
-		)
-		(fp_line
-			(start 5.12 -1.37)
-			(end 5.12 -1.033)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "8bf9c7a7-3ca7-4734-88fb-12a81f299080")
 		)
 		(fp_rect
 			(start -1.05 -1.5)
@@ -23393,7 +23202,7 @@
 			(uuid "12fffc2b-52d4-4ddc-8ffd-aebdfbd09dc6")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 2.5 0 90)
+			(at 2.5 0 0)
 			(layer "F.Fab")
 			(uuid "1f607b9e-1697-407e-af1c-0f36ff240af2")
 			(effects
@@ -23404,7 +23213,7 @@
 			)
 		)
 		(pad "1" thru_hole circle
-			(at 0 0 270)
+			(at 0 0 180)
 			(size 1.6 1.6)
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
@@ -23414,7 +23223,7 @@
 			(uuid "46f4eb5c-c97d-498c-b9f1-cc9a8189e437")
 		)
 		(pad "2" thru_hole circle
-			(at 5 0 270)
+			(at 5 0 180)
 			(size 1.6 1.6)
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
@@ -24556,6 +24365,168 @@
 			)
 		)
 	)
+	(footprint "Inductor_THT:L_Radial_D6.0mm_P4.00mm"
+		(layer "F.Cu")
+		(uuid "f468bee4-6dd1-4506-a888-7b64f5aa152a")
+		(at 52.94 47.89 180)
+		(descr "Inductor, Radial series, Radial, pin pitch=4.00mm, diameter=6.0mm, height=4.6mm, http://www.abracon.com/Magnetics/radial/AIUR-07.pdf")
+		(tags "Inductor Radial series Radial pin pitch 4.00mm  diameter 6.0mm height 4.6mm")
+		(property "Reference" "FB1"
+			(at 2 -4.25 0)
+			(layer "F.SilkS")
+			(uuid "438c0c33-6a87-4f97-93d3-84855400be25")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" "FerriteBead"
+			(at 2 4.25 0)
+			(layer "F.Fab")
+			(uuid "b0c8b1fb-c64c-4b72-918f-471759592e4f")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "37f0e950-84b0-4f5e-81be-2a25d1876d80")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Ferrite bead"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "fb78a508-4c7f-4305-9cea-d29f534be151")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "KiLib_Generator" "choke_THT"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "f6326cce-c2f4-452f-ba01-28c05b7f31dc")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property ki_fp_filters "Inductor_* L_* *Ferrite*")
+		(path "/5379a02a-ca33-47a4-997a-c0f703e80af8")
+		(sheetname "/")
+		(sheetfile "edu-01.kicad_sch")
+		(units
+			(unit
+				(name "A")
+				(pins "1" "2")
+			)
+		)
+		(attr through_hole)
+		(duplicate_pad_numbers_are_jumpers no)
+		(fp_arc
+			(start 4.85426 1.26)
+			(mid 2 3.12)
+			(end -0.85426 1.26)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "5ec52937-0ee1-40d1-a789-0e1f16e14633")
+		)
+		(fp_arc
+			(start -0.85426 -1.26)
+			(mid 2 -3.12)
+			(end 4.85426 -1.26)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "3ed2beeb-4828-4c0b-b0b7-dd32ba0a6665")
+		)
+		(fp_circle
+			(center 2 0)
+			(end 5.49 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "528dfcd8-1c5d-4f99-ade5-bbdd8bb12b8a")
+		)
+		(fp_circle
+			(center 2 0)
+			(end 5 0)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "3ea76aa1-22f2-46f9-acdf-4c3127f240c7")
+		)
+		(fp_text user "${REFERENCE}"
+			(at 2 0 0)
+			(layer "F.Fab")
+			(uuid "a29e78cd-bbb0-40e2-8cfa-a8318cff0c39")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 180)
+			(size 2 2)
+			(drill 1)
+			(layers "*.Cu" "*.Mask")
+			(remove_unused_layers no)
+			(net "Net-(F1-Pad2)")
+			(pintype "passive")
+			(uuid "e605f417-f611-41ff-9a76-ffb6cfd5985a")
+		)
+		(pad "2" thru_hole circle
+			(at 4 0 180)
+			(size 2 2)
+			(drill 1)
+			(layers "*.Cu" "*.Mask")
+			(remove_unused_layers no)
+			(net "+5V")
+			(pintype "passive")
+			(uuid "9d582ace-cce1-454f-a751-c7e921d5e2d3")
+		)
+		(embedded_fonts no)
+		(model "${KICAD10_3DMODEL_DIR}/Inductor_THT.3dshapes/L_Radial_D6.0mm_P4.00mm.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
+	)
 	(footprint "Connector_Audio:Jack_3.5mm_CUI_SJ1-3533NG_Horizontal"
 		(locked yes)
 		(layer "F.Cu")
@@ -25340,7 +25311,7 @@
 	(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
 		(layer "F.Cu")
 		(uuid "fe0793e9-5121-4b2a-80e2-dd7ff8bc5dc0")
-		(at 55.32 53.53)
+		(at 56.5 53.71)
 		(descr "Resistor, Axial_DIN0207 series, Axial, Horizontal, pin pitch=10.16mm, 0.25W = 1/4W, length*diameter=6.3*2.5mm^2, http://cdn-reichelt.de/documents/datenblatt/B400/1_4W%23YAG.pdf")
 		(tags "Resistor Axial_DIN0207 series Axial Horizontal pin pitch 10.16mm 0.25W = 1/4W length 6.3mm diameter 2.5mm")
 		(property "Reference" "R6"
