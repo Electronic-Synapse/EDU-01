@@ -10,9 +10,11 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
                                         │
                               R2/R3 divider + U3C buffer = VREF (2.5 V)
                                         │
-   TUNE1 LEVEL1     OSC1 ─┐             │
-   TUNE2 LEVEL2     OSC2 ─┼─ mixer U2C ─ clipper U2D ─ Sallen-Key U3A ─ buffer U3B ─ J2 3.5 mm
-   TUNE3 LEVEL3     OSC3 ─┘                D2/D3       CUTOFF (RV7A/B) RES (RV8)
+   TUNE_1 LEVEL_1   OSC1 ─┐             │
+   TUNE_2 LEVEL_2   OSC2 ─┼─ mixer U2C ─ clip U2D ─ Sallen-Key U3A ─ buffer U3B ─ MASTER_LEVEL ─ J2 3.5 mm
+   TUNE_3 LEVEL_3   OSC3 ─┘                LED pair       CUTOFF1    RES1           A10k
+                                        D2/D3 via R32
+                                        to VREF
 ```
 
 ## Key specs
@@ -22,32 +24,39 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
 | Supply | USB-C VBUS 5 V via 6-pin 2.54 mm breakout (polyfuse + ferrite) |
 | Virtual ground | VREF = 2.5 V (R2/R3 divider, buffered by U3C) |
 | Oscillators | 3× op-amp saw core (integrator + comparator + 2N3904 cap reset) |
-| Osc range | ~0–2 kHz, parks at 0 Hz at the low end of TUNE |
-| Mixer | Inverting summer, ~unity gain per osc (22 k/22 k) |
-| Soft clip | 1N4148 anti-parallel pair + R25 in feedback of U2D |
-| Filter | 2-pole Sallen-Key LP, ~720 Hz–7.2 kHz cutoff (dual-gang B100k + 1 k min), RES to self-oscillation |
-| Output | AC-coupled 10 µF, 1 k series R to tip+ring, sleeve = GND |
+| Osc range | ~0–1.5 kHz (4.7 k Rin), parks at 0 Hz at the low end of TUNE |
+| Mixer | Inverting summer, unity gain per osc (10 k/10 k) |
+| Clip | Shunt LED clipper on U2D out: anti-parallel LEDs + 220 Ω to VREF |
+| Filter | 2-pole Sallen-Key LP, ~72 Hz–7.2 kHz cutoff (dual-gang 100k + 1 k min), RES to self-oscillation |
+| Output | AC-coupled 10 µF → A10k master level → 1 k series R to tip+ring, sleeve = GND |
 | Test points | TP1 +5V, TP2 VREF, TP3–5 SAW1–3, TP6 MIX, TP7 CLIP, TP8 OUT, TP9 GND |
 
-## Controls (8 pots)
+## Controls (9 pots)
 
-- **TUNE1/2/3** — B10k, oscillator pitch (current into the integrator)
-- **LEVEL1/2/3** — B10k, per-osc level into the mixer
-- **CUTOFF** — dual-gang B100k (RV7A/RV7B), tracks both filter sections
-- **RESONANCE** — B22k, filter feedback; max ≈ self-oscillation
+- **TUNE_1/2/3** — B10k, oscillator pitch (current into the integrator)
+- **LEVEL_1/2/3** — B10k, per-osc level into the mixer
+- **CUTOFF1** — dual-gang 100k, tracks both filter sections
+- **RES1** — B22k, filter feedback; self-oscillation over the top half
+- **MASTER_LEVEL1** — A10k (audio taper), output volume after the DC-block cap
 
 ## Design notes
 
 - **Op-amps**: 3× MCP6004-I/P (DIP-14), chosen because TL07x cannot run on
   a single 5 V rail (its input common-mode range doesn't include ground).
   MCP6004 is rail-to-rail I/O and cheap/common.
-- **Saw core**: tune pot feeds current through R_in into the integrator
-  summing node; the comparator trips at ~0.9 V (R5/R6 divider) and pulses
-  the 2N3904 base, discharging the integrator cap (E→SAW, C→summation).
-- **Soft clip**: separate inverting stage after the mixer so it can be
-  probed/bypassed; diodes begin conducting ~0.55 V around the 20 k path.
-- **Filter Q**: RES pot varies negative feedback into U3A −in against
-  the R28 VREF bias; gain range ≈ 1→3.2, reaching self-oscillation.
+- **Saw core**: tune pot feeds current through R_in (4.7 k) into the
+  integrator summing node; the comparator trips at ~0.9 V (R5/R6 divider)
+  and pulses the 2N3904 base, discharging the integrator cap (E→SAW,
+  C→summation).
+- **Clip**: U2D is a ×2 inverting stage (R24/R23); its output feeds an
+  anti-parallel LED pair through R32 (220 Ω) to VREF. When the signal
+  exceeds ~±Vf (~1.9 V red) around VREF, the LEDs squash the peak and
+  visibly blink — a shunt clipper referenced to the virtual ground,
+  *not* to GND.
+- **Filter Q**: RES1 (B22k) varies feedback against R28 (4.7 k) at
+  U3A −in: gain range ≈ 1→5.7, so Q crosses self-oscillation at ~40 %
+  of travel — the top of the pot is an oscillator whose pitch follows
+  CUTOFF1.
 - All resistors 1 %, all caps TH ceramic (100 n/22 n) or electrolytic
   (1 µ/10 µ/100 µ).
 
@@ -63,11 +72,12 @@ kicad/gen/sym/*.sym      symbol blocks extracted from stock KiCad 10 libs
 
 ## Regenerating the schematic
 
-The schematic is authored programmatically (grid-snapped, pin-derived
-wiring). To regenerate after edits:
+The schematic was authored programmatically, then hand-finished in the
+KiCad editor (values, LED clipper, master level, ref renaming). Note that
+`gen_schematic.py` reproduces the *generated baseline* — running it now
+would revert the hand edits, so it is kept for reference only:
 
 ```sh
-cd kicad && python3 gen_schematic.py
 kicad-cli sch erc edu-01.kicad_sch        # expect 0 violations
 kicad-cli sch export pdf edu-01.kicad_sch -o edu-01.pdf
 ```
@@ -78,12 +88,12 @@ kicad-cli sch export pdf edu-01.kicad_sch -o edu-01.pdf
 | --- | --- |
 | 3 | MCP6004-I/P (DIP-14) |
 | 3 | 2N3904 (TO-92) |
-| 2 | 1N4148 |
-| 1 | 3 mm LED |
+| 3 | LED (1 × power, 2 × clip pair) |
 | 6 | B10k 9 mm vertical pot (Alpha RD901F-style) |
-| 1 | dual-gang B100k (RD902F-style) |
+| 1 | A10k 9 mm vertical pot (master level) |
+| 1 | dual-gang 100k pot (RD902F-style) |
 | 1 | B22k 9 mm pot |
-| 31 | resistors 1 % (0.25 W, axial) |
+| 31 | resistors 1 % (0.25 W, axial): 10×10k, 7×4.7k, 3×47k, 3×1M, 4×1k, 1×20k, 1×100k, 1×1.5k, 1×220 |
 | 16 | ceramic + electrolytic caps (TH) |
 | 1 | USB-C 6-pin 2.54 mm breakout |
 | 1 | polyfuse 500 mA, ferrite bead, SJ1-3533NG 3.5 mm jack |
