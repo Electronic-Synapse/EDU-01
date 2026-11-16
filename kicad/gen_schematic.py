@@ -112,7 +112,7 @@ wire(j1p[2],(34,gy)); gnd(34,gy); pflag(36,gy)
 TP9 = place("Connector:TestPoint","TP9","GND",37,125,0,1,F_TP)
 wire((37,gy),(37,125),pin(TP9,1)); jct(37,gy)
 for n in (3,4,5,6): nc(*j1p[n])
-text("USB-C breakout: 1=VBUS 2=GND (D+/D-/CCx NC)", 60, 121, 1.5)
+text("USB-C breakout: 1=VBUS 2=GND | CC1/CC2: 5.1k to GND each (unless on breakout) | D+/D- NC", 60, 121, 1.5)
 
 C1 = place("Device:C_Polarized","C1","100uF",62,115,0,1,FP_100U)
 wire(pin(C1,2),(62,120)); pwr5(62,120)          # pin2 = + under flip? -> check: pin2 at top

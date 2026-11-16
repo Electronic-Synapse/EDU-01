@@ -8,7 +8,7 @@
       "internal_id": "",
       "mfg": "",
       "mpn": "",
-      "sch_revision": "0.1.0"
+      "sch_revision": "0.1"
     },
     "layer_pairs": [],
     "layer_presets": [],
@@ -256,7 +256,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "lyra.kicad_pro",
+    "filename": "edu-01.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -411,8 +411,8 @@
     "subpart_id_separator": 0,
     "top_level_sheets": [
       {
-        "filename": "lyra.kicad_sch",
-        "name": "Root",
+        "filename": "edu-01.kicad_sch",
+        "name": "edu-01",
         "uuid": "0ec77515-b20c-4696-8261-92d4835dc067"
       }
     ],
@@ -421,8 +421,8 @@
   },
   "sheets": [
     [
-      "25f3d31b-b186-4db2-8efd-e20065117ac4",
-      "Root"
+      "0ec77515-b20c-4696-8261-92d4835dc067",
+      "edu-01"
     ]
   ],
   "text_variables": {},

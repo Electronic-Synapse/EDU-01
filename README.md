@@ -18,7 +18,7 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
 ## Key specs
 
 | Spec | Value |
-|---|---|
+| --- | --- |
 | Supply | USB-C VBUS 5 V via 6-pin 2.54 mm breakout (polyfuse + ferrite) |
 | Virtual ground | VREF = 2.5 V (R2/R3 divider, buffered by U3C) |
 | Oscillators | 3× op-amp saw core (integrator + comparator + 2N3904 cap reset) |
@@ -75,7 +75,7 @@ kicad-cli sch export pdf edu-01.kicad_sch -o edu-01.pdf
 ## BOM (core parts)
 
 | Qty | Part |
-|---|---|
+| --- | --- |
 | 3 | MCP6004-I/P (DIP-14) |
 | 3 | 2N3904 (TO-92) |
 | 2 | 1N4148 |
@@ -90,7 +90,13 @@ kicad-cli sch export pdf edu-01.kicad_sch -o edu-01.pdf
 
 ## Build notes
 
-- J1 pinout used: **1 = VBUS, 2 = GND**; pins 3–6 (D±/CC) are NC.
+- J1 pinout used: **1 = VBUS, 2 = GND**; pins 3–6 are NC on the board.
+- **CC resistors**: for a USB-C host/charger to deliver power, both
+  CC1 and CC2 must each see **5.1 kΩ to GND** (Rd). Check your
+  breakout's silkscreen — many 6-pin boards already have them fitted;
+  if not, add one 5.1 kΩ from each CC pin to GND. Never share a single
+  resistor between CC1/CC2, and don't duplicate on-board if the
+  breakout has them (parallel → ~2.55 kΩ → source refuses power).
 - U3D is a spare op-amp wired as a VREF follower (keep it populated).
 - Probe order for a first smoke test: TP1 (+5 V) → TP2 (VREF ≈ 2.5 V) →
   TP3–5 (saws) → TP6 (mix) → TP7 (clip) → TP8 (out).
