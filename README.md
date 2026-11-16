@@ -64,22 +64,8 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
 
 ```
 kicad/edu-01.kicad_pro   project
-kicad/edu-01.kicad_sch   schematic (generated)
-kicad/edu-01.kicad_pcb   skeleton board (2-layer, 100×60 mm outline)
-kicad/gen_schematic.py   schematic/PCB generator (see below)
-kicad/gen/sym/*.sym      symbol blocks extracted from stock KiCad 10 libs
-```
-
-## Regenerating the schematic
-
-The schematic was authored programmatically, then hand-finished in the
-KiCad editor (values, LED clipper, master level, ref renaming). Note that
-`gen_schematic.py` reproduces the *generated baseline* — running it now
-would revert the hand edits, so it is kept for reference only:
-
-```sh
-kicad-cli sch erc edu-01.kicad_sch        # expect 0 violations
-kicad-cli sch export pdf edu-01.kicad_sch -o edu-01.pdf
+kicad/edu-01.kicad_sch   schematic
+kicad/edu-01.kicad_pcb   board layout
 ```
 
 ## BOM (core parts)
