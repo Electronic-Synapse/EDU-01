@@ -9,7 +9,8 @@ GRID = 1.27
 def u(): return str(uuid.uuid4())
 def G(v): return round(round(v/GRID)*GRID, 4)
 def P(x,y): return (G(x),G(y))
-# KiCad lib symbol offsets have +y DOWN vs the sheet's +y UP.
+# Sheet +y is DOWN. Symbol-library pin offsets have +y UP relative to the
+# sheet, so rot() negates the transformed y component (verified by netlist).
 def rot(dx, dy, a):
     r = math.radians(a)
     return (dx*math.cos(r) - dy*math.sin(r), -(dx*math.sin(r) + dy*math.cos(r)))
@@ -57,11 +58,11 @@ def pin(sym, name):
     return P(sym["x"]+rx, sym["y"]+ry)
 
 _pwrcnt = {}
-def place(libid, ref, val, x, y, a=0, unit=1, fp="", desc=None):
+def place(libid, ref, val, x, y, a=0, unit=1, fp="", desc=None, lr=None, lv=None):
     if ref in ("#PWR","#FLG"):
         _pwrcnt[ref] = _pwrcnt.get(ref,0)+1
         ref = "%s%04d" % (ref, _pwrcnt[ref])
-    s = {"libid":libid,"ref":ref,"val":val,"x":G(x),"y":G(y),"a":a,"unit":unit,"fp":fp,"desc":desc}
+    s = {"libid":libid,"ref":ref,"val":val,"x":G(x),"y":G(y),"a":a,"unit":unit,"fp":fp,"desc":desc,"lr":lr,"lv":lv}
     symbols.append(s); return s
 
 def wire(*pts):
@@ -93,249 +94,257 @@ F_JK = "Connector_Audio:Jack_3.5mm_CUI_SJ1-3533NG_Horizontal"
 F_POT = "Potentiometer_THT:Potentiometer_Alpha_RD901F-40-00D_Single_Vertical"
 F_POT2 = "Potentiometer_THT:Potentiometer_Alpha_RD902F-40-00D_Dual_Vertical"
 
-# ================= POWER (top-left strip) =================
-# J1 unrotated: pin1 lands at (39.37, y-5.08); put VBUS rail at that level.
-JY = 135
+# ref/value text offsets (sheet mm, +y down) per (libid, angle) — the lib
+# defaults collide when a symbol is rotated
+LBL = {
+ ("Device:R",90):            ((0,-4.5),(0,5)),
+ ("Device:R",0):             ((4.5,-1.5),(4.5,1.5)),
+ ("Device:R_Potentiometer",0):((-8,-1),(-8,2)),
+ ("Device:R_Potentiometer",270):((0,-5),(0,6.5)),
+ ("Diode:1N4148",90):        ((0,-4.5),(0,5)),
+ ("Diode:1N4148",270):       ((0,-4.5),(0,5)),
+ ("Device:C",90):            ((0,-5),(0,6)),
+ ("Device:C_Polarized",90):  ((0,-5),(0,6)),
+ ("Device:LED",90):          ((0,-5),(0,5)),
+ ("Transistor_BJT:2N3904",0):((-5,-5.5),(7,4)),
+ ("Connector_Audio:AudioJack3",180):((0,-9),(0,-12)),
+}
+
+# ================= POWER (top band) =================
+# J1 pins face left, pin1 = VBUS on top. +5V rail runs right at that level.
+JY = 30
 J1 = place("Connector_Generic:Conn_01x06","J1","USB-C breakout",45,JY,0,1,F_HD)
 j1p = {n:pin(J1,n) for n in range(1,7)}
-vy = j1p[1][1]   # VBUS level
-gy = j1p[2][1]   # GND level
-F1 = place("Device:Polyfuse","F1","500mA",58,vy,90,1,FPC)
-wire(j1p[1], pin(F1,1))
-L1 = place("Device:FerriteBead","L1","600R@100MHz",72,vy,90,1,FPR)
+vy,gy = j1p[1][1], j1p[2][1]           # VBUS / GND pin rows
+F1 = place("Device:Polyfuse","F1","500mA",54,vy,90,1,FPC)
+wire(j1p[1], pin(F1,1)); label("VBUS", 41, vy)
+L1 = place("Device:FerriteBead","L1","600R@100MHz",68,vy,90,1,FPR)
 wire(pin(F1,2), pin(L1,1))
-wire(pin(L1,2), (84,vy)); pwr5(84,vy); pflag(81,vy)
-TP1 = place("Connector:TestPoint","TP1","+5V",88,vy,0,1,F_TP)
-wire((84,vy), pin(TP1,1))
-label("VBUS", 43,vy)
-wire(j1p[2],(34,gy)); gnd(34,gy); pflag(36,gy)
-TP9 = place("Connector:TestPoint","TP9","GND",37,125,0,1,F_TP)
-wire((37,gy),(37,125),pin(TP9,1)); jct(37,gy)
+RAILY = vy                            # +5V rail level (~25.4)
+wire(pin(L1,2),(74,RAILY)); wire((74,RAILY),(341.63,RAILY))
+pwr5(74,RAILY); pflag(76,RAILY)
+TP1 = place("Connector:TestPoint","TP1","+5V",80,RAILY,0,1,F_TP)
+# J1 GND pin + NC pins
+wire(j1p[2],(30,gy)); gnd(30,gy); pflag(33,gy)
+TP9 = place("Connector:TestPoint","TP9","GND",34,18,0,1,F_TP)
+wire((34,gy),(34,18),pin(TP9,1)); jct(34,gy)
 for n in (3,4,5,6): nc(*j1p[n])
-text("USB-C breakout: 1=VBUS 2=GND | CC1/CC2: 5.1k to GND each (unless on breakout) | D+/D- NC", 60, 121, 1.5)
+text("USB-C breakout: 1=VBUS 2=GND | CC 5.1k on breakout | D+/D- NC", 70, 15, 1.5)
 
-C1 = place("Device:C_Polarized","C1","100uF",62,115,0,1,FP_100U)
-wire(pin(C1,2),(62,120)); pwr5(62,120)          # pin2 = + under flip? -> check: pin2 at top
-wire(pin(C1,1),(62,108)); gnd(62,108)
-C2 = place("Device:C","C2","100n",74,115,0,1,FPC)
-wire(pin(C2,2),(74,120)); pwr5(74,120)
-wire(pin(C2,1),(74,108)); gnd(74,108)
+# bulk + decoupling caps hang off the rail: pin1 (+) up to +5V, pin2 to GND
+C1 = place("Device:C_Polarized","C1","100uF",84,29.21,0,1,FP_100U)
+wire(pin(C1,1),(84,RAILY))
+wire(pin(C1,2),(84,38)); gnd(84,38)
+C2 = place("Device:C","C2","100n",92,29.21,0,1,FPC)
+wire(pin(C2,1),(92,RAILY))
+wire(pin(C2,2),(92,38)); gnd(92,38)
 
-R1 = place("Device:R","R1","1.5k",98,118,0,1,FPR)
-wire(pin(R1,2),(98,125)); pwr5(98,125)
-D1 = place("Device:LED","D1","PWR",98,108,90,1,F_LED)
-wire(pin(R1,1), pin(D1,2))          # R -> LED anode (pin2)
-wire(pin(D1,1),(98,102)); gnd(98,102)  # cathode -> GND
+# power LED: rail -> R1 -> LED anode -> GND
+R1 = place("Device:R","R1","1.5k",104,29.21,0,1,FPR)
+wire(pin(R1,1),(104,RAILY))
+D1 = place("Device:LED","D1","PWR",104,40,90,1,F_LED)
+wire(pin(R1,2), pin(D1,2))
+wire(pin(D1,1),(104,48)); gnd(104,48)
 
-# ---- VREF divider + buffer (top-right) ----
-R2 = place("Device:R","R2","10k",195,140,0,1,FPR)
-wire(pin(R2,2),(195,147)); pwr5(195,147)
-R3 = place("Device:R","R3","10k",195,122,0,1,FPR)
-wire(pin(R2,1), pin(R3,2)); jct(195,128.73)
-wire(pin(R3,1),(195,115)); gnd(195,115)
-C3 = place("Device:C_Polarized","C3","10uF",204,124,0,1,FP_10U)
-wire((195,128.73),(204,128.73),pin(C3,2))
-wire(pin(C3,1),(204,118)); gnd(204,118)
-U3C = place("Amplifier_Operational:MCP6004","U3","MCP6004",230,135,0,3,F_DIP)
+# ---- VREF divider + buffer ----
+R2 = place("Device:R","R2","10k",158,29.21,0,1,FPR)
+wire(pin(R2,1),(158,RAILY))
+R3 = place("Device:R","R3","10k",158,41,0,1,FPR)
+wire(pin(R2,2), pin(R3,1)); jct(158,35)          # divider tap
+wire(pin(R3,2),(158,49)); gnd(158,49)
+C3 = place("Device:C_Polarized","C3","10uF",169,40,0,1,FP_10U)
+wire((158,35),(169,35),(169,pin(C3,1)[1]),pin(C3,1)); jct(169,35)
+wire(pin(C3,2),(169,48)); gnd(169,48)
+U3C = place("Amplifier_Operational:MCP6004","U3","MCP6004",205,38,0,3,F_DIP)
 o8,pi,mi = (pin(U3C,n) for n in AMP[3])
-wire((195,128.73),(214,128.73),(214,pi[1]),pi)
-wire(o8,(253,135)); vref(253,135)
-wire((243,135),(243,mi[1]),mi); jct(243,135)
-C4 = place("Device:C","C4","100n",258,128,0,1,FPC)
-wire(pin(C4,2),(258,135)); jct(258,135)
-wire(pin(C4,1),(258,121)); gnd(258,121)
-TP2 = place("Connector:TestPoint","TP2","VREF",262,135,0,1,F_TP)
-wire((253,135),pin(TP2,1))
+wire((158,35),(190,35),(190,pi[1]),pi)
+TP2 = place("Connector:TestPoint","TP2","VREF",234,38,0,1,F_TP)
+wire(o8,pin(TP2,1)); vref(222,38); jct(218,38); jct(226,38)
+wire(o8,(218,38),(218,44),(193,44),(193,mi[1]),mi)   # fb under the body
+C4 = place("Device:C","C4","100n",226,43,0,1,FPC)
+wire(pin(C4,1),(226,38))
+wire(pin(C4,2),(226,50)); gnd(226,50)
+text("VREF = 2.5V buffered (U3C)", 195, 20, 1.5)
 
-# IC supply pins + decoupling (top strip); unit5 at a=180 so VDD lands on top
-for ref,cn,x in [("U1","C14",280),("U2","C15",300),("U3","C16",320)]:
-    ue = place("Amplifier_Operational:MCP6004",ref,"MCP6004",x,140,180,5,F_DIP)
-    c  = place("Device:C",cn,"100n",x+14,140,0,1,FPC)
-    p4,p11 = pin(ue,4), pin(ue,11)        # a=180: p4 top, p11 bottom
-    c2p,c1p = pin(c,2), pin(c,1)
-    wire(p4,(p4[0],149.86)); pwr5(p4[0],149.86)
-    wire(p11,(p11[0],129.54)); gnd(p11[0],129.54)
-    wire(c2p,(c2p[0],149.86),(p4[0],149.86))
-    wire(c1p,(c1p[0],129.54),(p11[0],129.54))
-text("POWER: USB-C 5V -> +5V   |   VREF = 2.5V buffered   |   IC supply pins + 100n decouple", 160, 152, 2.2)
+# IC supply pins + 100n decoupling, one group per package (unit5 a=180: VDD top)
+for ref,cn,x in [("U1","C14",280),("U2","C15",305),("U3","C16",330)]:
+    ue = place("Amplifier_Operational:MCP6004",ref,"MCP6004",x,38,0,5,F_DIP)
+    c  = place("Device:C",cn,"100n",x+12,32,0,1,FPC)
+    p4,p11 = pin(ue,4), pin(ue,11)
+    wire(p4,(p4[0],RAILY))
+    wire(p11,(p11[0],50)); gnd(p11[0],50)
+    wire(pin(c,1),(pin(c,1)[0],RAILY))
+    wire(pin(c,2),(pin(c,2)[0],50),(p11[0],50))
+text("IC supply pins + 100n decoupling (per package)", 280, 20, 1.5)
+
+# ================= SPARE U3D (top-right, wired as VREF follower) =================
+ud = place("Amplifier_Operational:MCP6004","U3","MCP6004",440,30,0,4,F_DIP)
+do,dpi,dmi = (pin(ud,n) for n in AMP[4])
+wire(dpi,(424,dpi[1])); vref(424,dpi[1],270)
+wire(do,(456,30),(456,25),(429,25),(429,dmi[1]),dmi)  # fb over the top
+text("U3D spare (follower)", 420, 42, 1.5)
 
 # ================= OSC BLOCKS =================
+# Per row: TUNE -> Rin -> integrator -> SAW -> comparator -> Rb -> 2N3904
+# reset (E->SAW, C->summation node over the top), coupling cap -> LEVEL -> Rmix.
 osc = [
  dict(rv_t="RV1",rin="R4", ci="C5", q="Q1", d1="R5", d2="R6", rh="R7", rb="R8", cp="C6",  rv_l="RV4", rm="R9",  ui=("U1",1), ucmp=("U1",2)),
  dict(rv_t="RV2",rin="R10",ci="C7", q="Q2", d1="R11",d2="R12",rh="R13",rb="R14",cp="C8",  rv_l="RV5", rm="R15", ui=("U1",3), ucmp=("U1",4)),
  dict(rv_t="RV3",rin="R16",ci="C9", q="Q3", d1="R17",d2="R18",rh="R19",rb="R20",cp="C10", rv_l="RV6", rm="R21", ui=("U2",1), ucmp=("U2",2)),
 ]
-YOSC = [17,62,107]   # OSC1 top .. OSC3 bottom (sheet +y renders downward)
+YOSC = [95,145,195]
 rmix_out = {}
 for i,(Y,R) in enumerate(zip(YOSC, osc)):
-    # TUNE pot (unrotated): p3 top, p1 bottom, wiper right
+    # TUNE pot: pin1 top -> +5V, pin3 bottom -> VREF, wiper -> Rin
     rvt = place("Device:R_Potentiometer",R["rv_t"],"B10k TUNE",105,Y,0,1,F_POT)
-    wire(pin(rvt,3),(105,Y+7.62)); pwr5(105,Y+7.62)
-    wire(pin(rvt,1),(105,Y-7.62)); vref(105,Y-7.62,180)
+    wire(pin(rvt,1),(105,Y-8)); pwr5(105,Y-8)
+    wire(pin(rvt,3),(105,Y+8)); vref(105,Y+8,180)
     rin = place("Device:R",R["rin"],"3.3k",117,Y,90,1,FPR)
     wire(pin(rvt,2), pin(rin,1))
+    # integrator: -in bottom-left = SN rail; +in top-left -> VREF
     ui = place("Amplifier_Operational:MCP6004",R["ui"][0],"MCP6004",141,Y,0,R["ui"][1],F_DIP)
     o,pi,mi = (pin(ui,n) for n in AMP[R["ui"][1]])
-    sny = mi[1]                    # -in rail (top, Y+2.54)
-    wire(pin(rin,2),(125,Y),(125,sny),(137.16,sny)); jct(125,sny); jct(137.16,sny)
-    # +in (bottom) -> VREF stub to the left
-    wire(pi,(127,pi[1])); vref(127,pi[1],270)
-    # integrating cap across SN <-> out
-    ci = place("Device:C",R["ci"],"220n",141,Y+8,90,1,FPC)
-    c1p,c2p = pin(ci,1), pin(ci,2)     # p1 left 137.16, p2 right 144.78
-    wire(c1p,(137.16,sny))
-    wire(c2p,(o[0],Y+8),o); jct(*o)
-    # comparator: out right; -in TOP (158.38,Y+2.54); +in BOTTOM (158.38,Y-2.54)
-    uc = place("Amplifier_Operational:MCP6004",R["ucmp"][0],"MCP6004",166,Y,0,R["ucmp"][1],F_DIP)
+    ci = place("Device:C",R["ci"],"220n",141,Y+9,90,1,FPC,lr=(0,4.5),lv=(0,8))
+    wire(pin(rin,2),(124,Y),(124,mi[1]),(pin(ci,1)[0],mi[1])); jct(124,mi[1])
+    wire(pi,(128,pi[1])); vref(128,pi[1],270)
+    # integrator cap SN <-> out (drawn below the amp)
+    wire(pin(ci,1),(pin(ci,1)[0],mi[1])); jct(pin(ci,1)[0],mi[1])
+    wire(pin(ci,2),(o[0],Y+9),o); jct(*o)
+    # comparator + threshold divider + hysteresis
+    uc = place("Amplifier_Operational:MCP6004",R["ucmp"][0],"MCP6004",176,Y,0,R["ucmp"][1],F_DIP)
     co,cpi,cmi = (pin(uc,n) for n in AMP[R["ucmp"][1]])
-    # SAW lane at sny level: out -> down/up to lane -> through comp -in -> toward cap
-    # jog column at x=155 keeps clear of the threshold tap at x=152
-    wire(o,(155,Y),(155,sny),(200,sny),(200,Y),(205,Y))
-    # +in divider: rd1 top +5V, rd2 bottom GND, mid to cpi
-    rd1 = place("Device:R",R["d1"],"47k",152,Y+14,0,1,FPR)
-    wire(pin(rd1,2),(152,Y+21)); pwr5(152,Y+21)
-    rd2 = place("Device:R",R["d2"],"10k",152,Y-2,0,1,FPR)
-    wire(pin(rd1,1), pin(rd2,2)); jct(152,Y+5.19)
-    wire((152,Y+5.19),(152,Y-2.54),cpi)
-    wire(pin(rd2,1),(152,Y-9)); gnd(152,Y-9)
-    # hysteresis: rh from cpi node up/right to co
-    rh = place("Device:R",R["rh"],"1M",174,Y+7,90,1,FPR)
-    wire((156,Y-2.54),(156,Y+7),pin(rh,1)); jct(156,Y-2.54)
-    wire(pin(rh,2),(181,Y+7),(181,Y),co); jct(181,Y)
-    rb = place("Device:R",R["rb"],"4.7k",188,Y,90,1,FPR)
-    wire(co,(181,Y),pin(rb,1))
-    q = place("Transistor_BJT:2N3904",R["q"],"2N3904",198,Y,0,1,F_Q)
+    # SAW: lane A integrator-out -> comp -in; lane B -> Q emitter + coupling cap
+    wire(o,(153,Y),(153,cmi[1]),cmi); jct(153,cmi[1])
+    # threshold divider +5V -> R5 -> tap -> R6 -> GND, tap -> comp +in rail
+    rd1 = place("Device:R",R["d1"],"47k",162,Y-18,0,1,FPR)
+    wire(pin(rd1,1),(162,Y-25)); pwr5(162,Y-25)
+    rd2 = place("Device:R",R["d2"],"10k",162,Y-6,0,1,FPR)
+    wire(pin(rd1,2), pin(rd2,1)); jct(162,Y-12)
+    wire(pin(rd2,2),(162,Y+1)); gnd(162,Y+1)
+    # +in node: pin -> up at 164 -> rail right to hysteresis
+    wire(cpi,(164,Y-2.54),(164,Y-12),(180.19,Y-12))
+    wire((162,Y-12),(164,Y-12))
+    rh = place("Device:R",R["rh"],"1M",184,Y-12,90,1,FPR)
+    rb = place("Device:R",R["rb"],"4.7k",190,Y,90,1,FPR)
+    wire(co,pin(rb,1)); jct(*pin(rb,1))
+    wire(pin(rh,2),(186.19,Y-12),pin(rb,1))
+    q = place("Transistor_BJT:2N3904",R["q"],"2N3904",203,Y,0,1,F_Q)
     wire(pin(rb,2), pin(q,2))
-    qe,qc = pin(q,1), pin(q,3)        # E top (+5.08), C bottom (-5.08) under flip
-    # E -> SAW lane (discharges C5 on reset); C -> SN rail, routed BELOW the
-    # divider GND stub (which ends at Y-9.62) to avoid touching it.
-    wire(qe,(qe[0],Y+7),(196,Y+7),(196,sny)); jct(196,sny)
-    wire(qc,(qc[0],Y-11),(130,Y-11),(130,sny)); jct(130,sny)
-    # coupling cap pin1(+) faces SAW (left)
-    cp = place("Device:C_Polarized",R["cp"],"1uF",209,Y,90,1,FP_1U)
-    cp1,cp2 = pin(cp,1), pin(cp,2)
-    wire((205,Y),cp1)
-    # level pot p3 top <- cap; p1 bottom -> VREF; wiper -> Rm
-    rvl = place("Device:R_Potentiometer",R["rv_l"],"B10k LEVEL",219,Y,0,1,F_POT)
-    wire(cp2,(214,Y),(214,Y+3.81),pin(rvl,3))
-    wire(pin(rvl,1),(219,Y-7.62)); vref(219,Y-7.62,180)
-    rm = place("Device:R",R["rm"],"22k",231,Y,90,1,FPR)
+    qe,qc = pin(q,1), pin(q,3)        # E bottom (Y+5.08), C top (Y-5.08)
+    # SAW lane B below the row: -in lane jct -> Q.E -> coupling cap
+    cp = place("Device:C_Polarized",R["cp"],"1uF",213,Y+8,90,1,FP_1U,lr=(0,5),lv=(0,8.5))
+    wire((153,cmi[1]),(153,Y+8),pin(cp,1))
+    wire(qe,(qe[0],Y+8))
+    # C -> SN over the top of the row
+    wire(qc,(qc[0],Y-30),(136,Y-30),(136,mi[1]))
+    # LEVEL pot: signal -> pin1 top; pin3 bottom -> VREF; wiper -> Rmix
+    rvl = place("Device:R_Potentiometer",R["rv_l"],"B10k LEVEL",227,Y+8,0,1,F_POT,lr=(4,-6),lv=(4,-3))
+    wire(pin(cp,2),(219,Y+8),(219,pin(rvl,1)[1]),pin(rvl,1))
+    wire(pin(rvl,3),(227,Y+15)); vref(227,Y+15,180)
+    rm = place("Device:R",R["rm"],"22k",237,Y+8,90,1,FPR)
     wire(pin(rvl,2), pin(rm,1))
     rmix_out[R["rm"]] = pin(rm,2)
-    tp = place("Connector:TestPoint","TP%d"%(3+i),"SAW%d"%(i+1),203,Y+5,0,1,F_TP)
-    wire((205,Y),(203,Y),(203,Y+5)); jct(203,Y)
-    text("OSC%d" % (i+1), 108, Y+13, 2.0)
+    tp = place("Connector:TestPoint","TP%d"%(3+i),"SAW%d"%(i+1),199,Y+12,0,1,F_TP)
+    wire((199,Y+8),(199,Y+12)); jct(199,Y+8)
+    text("OSC%d" % (i+1), 108, Y-15, 2.0)
 
-# ================= MIXER (U2C) =================
-um = place("Amplifier_Operational:MCP6004","U2","MCP6004",266,50,0,3,F_DIP)
-mo,mpi,mmo = (pin(um,n) for n in AMP[3])   # out (273.62,50); +in bottom (258.38,47.46); -in top (258.38,52.54)
-sny_m = mmo[1]
+# ================= SIGNAL CHAIN (bottom band, L->R) =================
+CY = 245
+# mix bus: all three Rmix outputs drain down column x=242 to the mixer -in
 for Y,R in zip(YOSC, osc):
     p2 = rmix_out[R["rm"]]
-    wire(p2,(249,Y),(249,sny_m)); jct(249,Y)
-wire((249,sny_m), mmo)
-wire(mpi,(251,mpi[1])); vref(251,mpi[1],270)
-rfm = place("Device:R","R22","22k",266,58,90,1,FPR)
-f1p,f2p = pin(rfm,1), pin(rfm,2)
-wire(mmo,(262,52.54),(262,57.15),f1p)
-wire(f2p,(270.51,50),mo); jct(270.51,50)
-TP6 = place("Connector:TestPoint","TP6","MIX",277,53,0,1,F_TP)
-wire(mo,(275,50),(275,53),pin(TP6,1)); jct(275,50)
-text("MIXER", 259, 62, 2.0)
+    wire(p2,(242,p2[1]))
+um = place("Amplifier_Operational:MCP6004","U2","MCP6004",275,CY,0,3,F_DIP)
+mo,mpi,mmo = (pin(um,n) for n in AMP[3])
+wire((242,YOSC[0]+8),(242,mmo[1]),mmo)
+wire(mpi,(262,mpi[1])); vref(262,mpi[1],270)
+rfm = place("Device:R","R22","22k",275,CY+10,90,1,FPR,lr=(0,5.5),lv=(0,9))
+wire(mmo,(267.38,CY+10),pin(rfm,1))
+wire(pin(rfm,2),(mo[0],CY+10),mo); jct(*mo)
+TP6 = place("Connector:TestPoint","TP6","MIX",286,CY-5,0,1,F_TP)
+wire((286,CY),(286,CY-5)); jct(286,CY)
+text("MIXER", 262, CY+16, 2.0)
 
-# ================= CLIPPER (U2D) =================
-ucp = place("Amplifier_Operational:MCP6004","U2","MCP6004",301,50,0,4,F_DIP)
-cpo,cppi,cpmi = (pin(ucp,n) for n in AMP[4])  # out 308.62; -in top 293.38,52.54; +in bottom 293.38,47.46
-sny_c = cpmi[1]
-r23 = place("Device:R","R23","10k",284,50,90,1,FPR)
-wire(mo,(275,50), pin(r23,1))
-wire(pin(r23,2),(289,50),(289,sny_c),(297.19,sny_c)); jct(289,sny_c)
-wire(cppi,(286,cppi[1])); vref(286,cppi[1],270)
-r24 = place("Device:R","R24","20k",301,58,90,1,FPR)
-f1p,f2p = pin(r24,1), pin(r24,2)
-wire((297.19,sny_c),(297.19,54.19),f1p)
-wire(f2p,(f2p[0],50),cpo); jct(f2p[0],50)
-r25 = place("Device:R","R25","470",301,66,90,1,FPR)
-k1p,k2p = pin(r25,1), pin(r25,2)
-wire(k1p,(297.19,62.19),(297.19,54.19)); jct(297.19,54.19)
-# clip rail: k2p -> D2.K + D3.A (bottom); D2.A + D3.K -> out (top)
-D2 = place("Diode:1N4148","D2","1N4148",305,71,270,1,F_D)
-D3 = place("Diode:1N4148","D3","1N4148",310,71,90,1,F_D)
+# ---- soft clip (U2D): R23 in, R24 fb, R25 + anti-parallel 1N4148 ----
+ucp = place("Amplifier_Operational:MCP6004","U2","MCP6004",310,CY,0,4,F_DIP)
+cpo,cppi,cpmi = (pin(ucp,n) for n in AMP[4])
+r23 = place("Device:R","R23","10k",295,CY,90,1,FPR)
+wire(mo,pin(r23,1)); jct(286,CY)
+wire(pin(r23,2),(297,CY),(297,cpmi[1]),cpmi)
+wire(cppi,(297,cppi[1])); vref(297,cppi[1],270)
+r24 = place("Device:R","R24","20k",315,CY+10,90,1,FPR,lr=(5,0.5),lv=(5,3))
+wire(cpmi,(302.38,CY+10),pin(r24,1))
+wire(pin(r24,2),(cpo[0],CY+10),cpo); jct(*cpo)
+r25 = place("Device:R","R25","470",315,CY+17,90,1,FPR,lr=(5,0.5),lv=(5,3.5))
+wire(pin(r24,1),(311.19,CY+17),pin(r25,1)); jct(311.19,CY+10)
+D2 = place("Diode:1N4148","D2","1N4148",325,CY+13,270,1,F_D,lr=(0,-8),lv=(0,-5.5))  # K top
+D3 = place("Diode:1N4148","D3","1N4148",330,CY+13,90,1,F_D,lr=(0,-8),lv="hide")      # A top
 d2k,d2a,d3k,d3a = pin(D2,1),pin(D2,2),pin(D3,1),pin(D3,2)
-wire(k2p,d2k,d3a)
-wire(d2a,d3k,(313,d2a[1]),(313,50),cpo)
-clip_out_pt = (308.62,50)
-TP7 = place("Connector:TestPoint","TP7","CLIP",315,53,0,1,F_TP)
-wire(clip_out_pt,(315,50),(315,53),pin(TP7,1))
-text("SOFT CLIP", 294, 76, 2.0)
+wire(pin(r25,2),(324,CY+17),(324,CY+19.5),(330,CY+19.5))  # bottom lane
+wire(d2a,(325,CY+19.5)); wire(d3k,(330,CY+19.5))
+wire(d2k,(325,CY+8.5),(330,CY+8.5),d3a)                   # top bridge
+wire((327.54,CY+8.5),(327.54,CY),cpo); jct(327.54,CY+8.5)
+TP7 = place("Connector:TestPoint","TP7","CLIP",322,CY-5,0,1,F_TP)
+wire((322,CY),(322,CY-5)); jct(322,CY)
+text("SOFT CLIP", 296, CY+22, 2.0)
 
-# ================= FILTER (U3A) =================
-ufa = place("Amplifier_Operational:MCP6004","U3","MCP6004",376,50,0,1,F_DIP)
-fo,fpi,fmi = (pin(ufa,n) for n in AMP[1])   # out 383.62; -in TOP 368.38,52.54; +in BOTTOM 368.38,47.46
-fy = fpi[1]          # 47.46 -> ladder rail level (bottom +in)
-sny_f = fmi[1]       # 52.54
-r26 = place("Device:R","R26","1k",325,fy,90,1,FPR)
-wire(clip_out_pt,(318,50),(318,fy),pin(r26,1))
-rv7a = place("Device:R_Potentiometer","RV7A","B100k CUT",335,fy,270,1,F_POT2)
-wire(pin(r26,2), pin(rv7a,3))                # pin3 = left under a=270
-w7a,o7a = pin(rv7a,2), pin(rv7a,1)           # wiper TOP, pin1 right
-wire(w7a,(o7a[0],w7a[1]),o7a); jct(*o7a)
-r27 = place("Device:R","R27","1k",345,fy,90,1,FPR)
-wire(o7a, pin(r27,1))
-rv7b = place("Device:R_Potentiometer","RV7B","B100k CUT",355,fy,270,1,F_POT2)
+# ---- Sallen-Key LP filter (U3A) ----
+ufa = place("Amplifier_Operational:MCP6004","U3","MCP6004",380,CY,0,1,F_DIP)
+fo,fpi,fmi = (pin(ufa,n) for n in AMP[1])
+fy = fpi[1]                                # ladder rail level (top +in)
+r26 = place("Device:R","R26","1k",340,fy,90,1,FPR)
+wire(cpo,(333,CY),(333,fy),pin(r26,1))
+rv7a = place("Device:R_Potentiometer","RV7A","B100k CUT",348,fy,270,1,F_POT2)
+wire(pin(r26,2), pin(rv7a,3))
+w7a,o7a = pin(rv7a,2), pin(rv7a,1)         # wiper bottom, pin1 right
+wire(w7a,(pin(rv7a,3)[0],w7a[1]),pin(rv7a,3))   # wiper tied to pin3
+r27 = place("Device:R","R27","1k",358,fy,90,1,FPR)
+wire(o7a, pin(r27,1)); jct(*o7a)
+rv7b = place("Device:R_Potentiometer","RV7B","B100k CUT",366,fy,270,1,F_POT2)
 wire(pin(r27,2), pin(rv7b,3))
 w7b,o7b = pin(rv7b,2), pin(rv7b,1)
-wire(w7b,(o7b[0],w7b[1]),o7b); jct(*o7b)
-wire(o7b, fpi)
-c12 = place("Device:C","C12","22n",363,40,0,1,FPC)
-wire(pin(c12,2),(pin(c12,2)[0],fy)); jct(pin(c12,2)[0],fy)
-wire(pin(c12,1),(pin(c12,1)[0],34)); gnd(pin(c12,1)[0],34)
-c11 = place("Device:C","C11","22n",350,58,90,1,FPC)
-wire(pin(c11,1),(341,58),(341,fy)); jct(341,fy)
-wire(pin(c11,2),(390,58),(390,50),fo); jct(390,50)
-# -in divider to VREF + RES pot
-r28 = place("Device:R","R28","10k",371,25,0,1,FPR)
-g1,g2 = pin(r28,2), pin(r28,1)        # g2=pin1 bottom -> VREF; g1=pin2 top -> -in
-wire(g1,(g1[0],sny_f))
-wire(fmi,(372,52.54)); jct(g1[0],sny_f)   # -in rail ends at rv8 column
-wire(g2,(371,18)); vref(371,18,180)
-rv8 = place("Device:R_Potentiometer","RV8","B22k RES",376,60,270,1,FPR)
-v1,vw,v3 = pin(rv8,1),pin(rv8,2),pin(rv8,3)  # a=270: p3 left, p1 right, wiper top
-wire(v3,(v3[0],sny_f))
-wire(vw,(v1[0],vw[1]),v1); jct(v1[0],vw[1])
-wire(v1,(v1[0],50),fo); jct(v1[0],50)
-text("FILTER  SK-LP (RV7A/B = dual gang)", 328, 63, 2.0)
+wire(w7b,(pin(rv7b,3)[0],w7b[1]),pin(rv7b,3))
+wire(o7b,fpi); jct(*o7b)
+c12 = place("Device:C","C12","22n",374,fy-10,0,1,FPC,lr=(6,-1),lv=(6,2))  # +in node -> GND
+wire(pin(c12,2),(374,fy),(371,fy)); jct(374,fy)
+wire(pin(c12,1),(374,fy-14)); gnd(374,fy-14)
+c11 = place("Device:C","C11","22n",354,fy+10,90,1,FPC,lr=(6,3))   # mid node -> out
+wire(pin(c11,1),(352,fy+10),(352,fy)); jct(352,fy)
+wire(pin(c11,2),(390,fy+10),(390,CY),fo); jct(390,CY)
+# -in: R28 to VREF, RV8 (RES) to out
+r28 = place("Device:R","R28","10k",374,CY+9,0,1,FPR,lr=(-4.5,-1.5),lv=(-4.5,1.5))
+rv8 = place("Device:R_Potentiometer","RV8","B22k RES",382,CY+7,270,1,FPR,lr=(-3,8.5),lv=(8,4))
+v3,vw,v1 = pin(rv8,3),pin(rv8,2),pin(rv8,1)  # p3 left, p1 right, wiper bottom
+# -in node: left of the body, down to R28's pin1 row, right to RV8's p3
+wire(fmi,(368,fmi[1]),(368,pin(r28,1)[1]),(v3[0],pin(r28,1)[1]),v3)
+jct(*pin(r28,1))
+wire(pin(r28,2),(374,CY+13)); vref(374,CY+13,180)
+wire(vw,(v1[0],vw[1]),v1); jct(*v1)
+wire(v1,(v1[0],CY),fo); jct(v1[0],CY)
+text("FILTER  SK-LP 2p (RV7A/B = dual gang)", 336, CY-17, 2.0)
 
-# ================= OUTPUT (U3B) =================
-ub = place("Amplifier_Operational:MCP6004","U3","MCP6004",400,50,0,2,F_DIP)
-bo,bpi,bmi = (pin(ub,n) for n in AMP[2])    # out 407.62; +in bottom 392.38,47.46; -in top 392.38,52.54
-wire(fo,(389,50),(389,bpi[1]),bpi); jct(389,50)
-wire(bo,(410,50),(410,bmi[1]),bmi)
-C13 = place("Device:C_Polarized","C13","10uF",417,50,90,1,FP_10U)
+# ---- output buffer (U3B) + jack ----
+ub = place("Amplifier_Operational:MCP6004","U3","MCP6004",410,CY,0,2,F_DIP)
+bo,bpi,bmi = (pin(ub,n) for n in AMP[2])
+wire(fo,(389,CY),(389,bpi[1]),bpi); jct(389,CY)
+wire(bo,(421,CY),(421,CY-7),(399,CY-7),(399,bmi[1]),bmi)  # fb over the top
+C13 = place("Device:C_Polarized","C13","10uF",427,CY,90,1,FP_10U)
 wire(bo, pin(C13,1))
 onx = pin(C13,2)
-wire(onx,(427,50)); jct(427,50)
-r29 = place("Device:R","R29","100k",424,44,0,1,FPR)
-wire(pin(r29,2),(424,50)); jct(424,50)
-wire(pin(r29,1),(424,38)); gnd(424,38)
-r30 = place("Device:R","R30","1k",434,52.54,90,1,FPR)
-wire((427,50),(427,52.54),pin(r30,1))
-r31 = place("Device:R","R31","1k",434,45.46,90,1,FPR)
-wire((427,50),(427,45.46),pin(r31,1))
-J2 = place("Connector_Audio:AudioJack3","J2","3.5mm OUT",450,50,180,1,F_JK)
-wire(pin(r30,2),(pin(r30,2)[0],pin(J2,"T")[1]),pin(J2,"T"))
-wire(pin(r31,2),(441,pin(r31,2)[1]),(441,pin(J2,"R")[1]),pin(J2,"R"))
-wire(pin(J2,"S"),(449,pin(J2,"S")[1]),(449,47.46)); gnd(449,47.46,90)
-TP8 = place("Connector:TestPoint","TP8","OUT",422,55,0,1,F_TP)
-wire((427,50),(422,50),(422,55),pin(TP8,1))
-text("OUT", 440, 58, 2.0)
-
-# ================= SPARE U3D =================
-ud = place("Amplifier_Operational:MCP6004","U3","MCP6004",400,20,0,4,F_DIP)
-do,dpi,dmi = (pin(ud,n) for n in AMP[4])
-wire(dpi,(388,dpi[1])); vref(388,dpi[1],270)
-wire(do,(410,20),(410,dmi[1]),dmi)
-text("U3D spare", 389, 25, 1.5)
+wire(onx,(433,CY)); jct(433,CY)
+r29 = place("Device:R","R29","100k",434,CY+7,0,1,FPR)
+wire(pin(r29,1),(434,CY))
+wire(pin(r29,2),(434,CY+11)); gnd(434,CY+11)
+TP8 = place("Connector:TestPoint","TP8","OUT",433,CY-7,0,1,F_TP)
+wire((433,CY),(433,CY-7))
+r30 = place("Device:R","R30","1k",440,CY-2.54,90,1,FPR)
+wire((433,CY),(436,CY),(436,pin(r30,1)[1]),pin(r30,1))
+r31 = place("Device:R","R31","1k",440,CY+2.54,90,1,FPR)
+wire((433,CY),(433,CY+2.54),pin(r31,1))
+J2 = place("Connector_Audio:AudioJack3","J2","3.5mm OUT",452,CY,180,1,F_JK)
+wire(pin(r30,2),(445,pin(r30,2)[1]),(445,pin(J2,"T")[1]),pin(J2,"T"))
+wire(pin(r31,2),(444,pin(r31,2)[1]),(444,pin(J2,"R")[1]),pin(J2,"R"))
+wire(pin(J2,"S"),(449,pin(J2,"S")[1]),(449,CY+6)); gnd(449,CY+6)
 
 # ================= EMIT =================
 def fmt(v):
@@ -389,12 +398,19 @@ for s in symbols:
     except Exception:
         ro,vo,desc = (0,5.08),(0,-5.08),""
     if s["desc"]: desc=s["desc"]
-    rx,ry = rot(ro[0],ro[1],a); vx,vy = rot(vo[0],vo[1],a)
+    lo = LBL.get((libid,a), (None,None))
+    if s["lr"]: rx,ry,ra = s["lr"][0],s["lr"][1],a
+    elif lo[0]: rx,ry,ra = lo[0][0],lo[0][1],a
+    else: rx,ry,ra = rot(ro[0],ro[1],a)+(a,)
+    if s["lv"]=="hide": vx,vy,va = 0,0,0
+    elif s["lv"]: vx,vy,va = s["lv"][0],s["lv"][1],a
+    elif lo[1]: vx,vy,va = lo[1][0],lo[1][1],a
+    else: vx,vy,va = rot(vo[0],vo[1],a)+(a,)
     body += f'\t(symbol\n\t\t(lib_id "{libid}")\n\t\t(at {fmt(s["x"])} {fmt(s["y"])} {a})\n\t\t(unit {s["unit"]})\n\t\t(body_style 1)\n'
     body += '\t\t(exclude_from_sim no)\n\t\t(in_bom yes)\n\t\t(on_board yes)\n\t\t(in_pos_files yes)\n\t\t(dnp no)\n\t\t(fields_autoplaced yes)\n'
     body += f'\t\t(uuid "{u()}")\n'
-    body += emit_prop("Reference",s["ref"],s["x"]+rx,s["y"]+ry,a,hide=s["ref"].startswith('#'))
-    body += emit_prop("Value",s["val"],s["x"]+vx,s["y"]+vy,a,hide=s["ref"].startswith('#FLG'))
+    body += emit_prop("Reference",s["ref"],s["x"]+rx,s["y"]+ry,ra,hide=s["ref"].startswith('#'))
+    body += emit_prop("Value",s["val"],s["x"]+vx,s["y"]+vy,va,hide=s["lv"]=="hide" or s["ref"].startswith('#FLG'))
     for nm,vv,hd in [("Footprint",s["fp"],True),("Datasheet","",True),("Description",desc,True)]:
         body += emit_prop(nm,vv,s["x"],s["y"],a,hd)
     for pn in PINS[libid][s["unit"]]:
