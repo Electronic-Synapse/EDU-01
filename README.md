@@ -23,7 +23,7 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
 | --- | --- |
 | Supply | USB-C VBUS 5 V via 6-pin 2.54 mm breakout (polyfuse + ferrite) |
 | Virtual ground | VREF = 2.5 V (R2/R3 divider, buffered by U3C) |
-| Oscillators | 3× op-amp saw core (integrator + comparator + 2N3904 cap reset) |
+| Oscillators | 3× op-amp saw core (integrator + comparator + BC547 cap reset) |
 | Osc range | ~0–1.5 kHz (4.7 k Rin), parks at 0 Hz at the low end of TUNE |
 | Mixer | Inverting summer, unity gain per osc (10 k/10 k) |
 | Clip | Shunt LED clipper on U2D out: anti-parallel red LEDs + 220 Ω to VREF |
@@ -48,7 +48,7 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
   MCP6004 is rail-to-rail I/O and cheap/common.
 - **Saw core**: tune pot feeds current through R_in (4.7 k) into the
   integrator summing node; the comparator trips at ~0.9 V (R5/R6 divider)
-  and pulses the 2N3904 base, discharging the integrator cap (E→SAW,
+  and pulses the BC547 base, discharging the integrator cap (E→SAW,
   C→summation).
 - **Clip**: U2D is a ×2 inverting stage (R24/R23); its output feeds an
   anti-parallel red LED pair through R32 (220 Ω) to VREF. When the signal
@@ -84,7 +84,7 @@ kicad/edu-01.kicad_pcb   board layout
 | Qty | Part |
 | --- | --- |
 | 3 | MCP6004-I/P (DIP-14) |
-| 3 | 2N3904 (TO-92) |
+| 3 | BC547 (TO-92) |
 | 5 | LED (1 × power, 2 × red clip pair, 2 × yellow RES pair) |
 | 6 | B10k 9 mm vertical pot (Alpha RD901F-style) |
 | 1 | A10k 9 mm vertical pot (master level) |
@@ -104,6 +104,8 @@ kicad/edu-01.kicad_pcb   board layout
   if not, add one 5.1 kΩ from each CC pin to GND. Never share a single
   resistor between CC1/CC2, and don't duplicate on-board if the
   breakout has them (parallel → ~2.55 kΩ → source refuses power).
+- Transistor pinout: **BC547 is C-B-E** (2N3904 is mirrored, E-B-C).
+  The board is silkscreened for BC547 — do not mix the two parts.
 - U3D is a spare op-amp wired as a VREF follower (keep it populated).
 - Probe order for a first smoke test: TP1 (+5 V) → TP2 (VREF ≈ 2.5 V) →
   TP3–5 (saws) → TP6 (mix) → TP7 (clip) → TP8 (out).
