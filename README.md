@@ -26,8 +26,9 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
 | Oscillators | 3× op-amp saw core (integrator + comparator + 2N3904 cap reset) |
 | Osc range | ~0–1.5 kHz (4.7 k Rin), parks at 0 Hz at the low end of TUNE |
 | Mixer | Inverting summer, unity gain per osc (10 k/10 k) |
-| Clip | Shunt LED clipper on U2D out: anti-parallel LEDs + 220 Ω to VREF |
+| Clip | Shunt LED clipper on U2D out: anti-parallel red LEDs + 220 Ω to VREF |
 | Filter | 2-pole Sallen-Key LP, ~72 Hz–7.2 kHz cutoff (dual-gang 100k + 1 k min), RES to self-oscillation |
+| RES limit | Anti-parallel yellow LEDs across RES1: oscillation settles ~±2 V clean sine |
 | Output | AC-coupled 10 µF → A10k master level → 1 k series R to tip+ring, sleeve = GND |
 | Test points | TP1 +5V, TP2 VREF, TP3–5 SAW1–3, TP6 MIX, TP7 CLIP, TP8 OUT, TP9 GND |
 
@@ -37,6 +38,7 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
 - **LEVEL_1/2/3** — B10k, per-osc level into the mixer
 - **CUTOFF1** — dual-gang 100k, tracks both filter sections
 - **RES1** — B22k, filter feedback; self-oscillation over the top half
+  (yellow LEDs light when the filter sings)
 - **MASTER_LEVEL1** — A10k (audio taper), output volume after the DC-block cap
 
 ## Design notes
@@ -49,7 +51,7 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
   and pulses the 2N3904 base, discharging the integrator cap (E→SAW,
   C→summation).
 - **Clip**: U2D is a ×2 inverting stage (R24/R23); its output feeds an
-  anti-parallel LED pair through R32 (220 Ω) to VREF. When the signal
+  anti-parallel red LED pair through R32 (220 Ω) to VREF. When the signal
   exceeds ~±Vf (~1.9 V red) around VREF, the LEDs squash the peak and
   visibly blink — a shunt clipper referenced to the virtual ground,
   *not* to GND.
@@ -57,6 +59,15 @@ USB-C 6-pin breakout ─ F1 polyfuse ─ L1 ferrite ─ +5V
   U3A −in: gain range ≈ 1→5.7, so Q crosses self-oscillation at ~40 %
   of travel — the top of the pot is an oscillator whose pitch follows
   CUTOFF1.
+- **RES limiter**: an anti-parallel yellow LED pair sits in parallel
+  with RES1's feedback path. Below ~±2 V they are transparent; past the
+  self-oscillation threshold they collapse the feedback gain, so the
+  loop settles into a clean ~±2 V sine instead of slamming the op-amp
+  rails. Yellow lit = filter oscillating, red lit = signal clipping —
+  classic amplitude stabilization, and a nice live readout.
+- **LED choice**: only low-Vf colors work here — the op-amp can only
+  swing ~±2 V around VREF, so blue/white/true-green (~3 V) would never
+  conduct. Red for the clipper (lowest threshold), yellow for RES.
 - All resistors 1 %, all caps TH ceramic (100 n/22 n) or electrolytic
   (1 µ/10 µ/100 µ).
 
@@ -74,7 +85,7 @@ kicad/edu-01.kicad_pcb   board layout
 | --- | --- |
 | 3 | MCP6004-I/P (DIP-14) |
 | 3 | 2N3904 (TO-92) |
-| 3 | LED (1 × power, 2 × clip pair) |
+| 5 | LED (1 × power, 2 × red clip pair, 2 × yellow RES pair) |
 | 6 | B10k 9 mm vertical pot (Alpha RD901F-style) |
 | 1 | A10k 9 mm vertical pot (master level) |
 | 1 | dual-gang 100k pot (RD902F-style) |
